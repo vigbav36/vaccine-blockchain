@@ -2,11 +2,11 @@
 
   ```bash
   git clone https://github.com/vigbav36/vaccine-blockchain.git
+  cd vaccine-blockchain
   ```
 
 ## Install hyperledger docker necessities
   ```bash
-  cd vaccine-blockchain
   ./install-fabric.sh docker binary
   ```
 ## Setting Up Network and deploying chain code
