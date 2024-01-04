@@ -35,9 +35,9 @@ Go to vaccine-blockchain/application from test-network
 
 Delete the wallet 
 
-    ```bash
+```bash
     rm -r wallet
-    ```
+```
 
 Run the vaccine.js file
  ```bash
