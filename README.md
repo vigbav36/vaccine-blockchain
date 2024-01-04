@@ -1,3 +1,7 @@
+# Vaccine Blockchain
+
+Implementation of a blockchain network for vaccine supply chain and a node application that is connected to this network
+
 ## Clone the repository:
 
   ```bash
@@ -11,19 +15,19 @@
   ```
 ## Setting Up Network and deploying chain code
 
-Go to test-network directory 
+###Go to test-network directory 
 
   ```bash
   cd test-network
   ```
 
-Run bash file run.sh
+###Run bash file run.sh
 
   ```bash
   ./run.sh
   ```
 
-The above file should have ended with the message 
+###The above file should have ended with the message 
 
  ```text
  Query chaincode definition successful on peer0.org2 on channel 'mychannel'
@@ -32,19 +36,19 @@ The above file should have ended with the message
 
 ## Running app
 
-Go to vaccine-blockchain/application from test-network
+###Go to vaccine-blockchain/application from test-network
 
   ```bash
   cd ../vaccine-blockchain/application
   ```
 
-Delete the wallet directory if present 
+###Delete the wallet directory if present 
 
 ```bash
 rm -r wallet
 ```
 
-Run the vaccine.js file
+###Run the vaccine.js file
  ```bash
   node vaccine.js
   ```
