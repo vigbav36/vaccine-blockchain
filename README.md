@@ -1,11 +1,14 @@
-Install hyperledger docker necessities
-
-Clone the repository:
+## Clone the repository:
 
   ```bash
   git clone https://github.com/vigbav36/vaccine-blockchain.git
   ```
 
+## Install hyperledger docker necessities
+  ```bash
+  cd vaccine-blockchain
+  ./install-fabric.sh docker binary
+  ```
 ## Setting Up Network and deploying chain code
 
 Go to test-network directory 
