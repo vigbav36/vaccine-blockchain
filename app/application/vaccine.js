@@ -103,8 +103,8 @@ exports.registerViolation = async (vaccine_id, violation) => {
 exports.addVaccine = async (vaccine) => {
 	const network = await connectToNetwork();
 	const contract = network.getContract(chaincodeName);
-
-	return await contract.submitTransaction('CreateAsset', vaccine.vaccineId, vaccine.containerId, vaccine.threshold, vaccine.readings, vaccine.brand, vaccine.owner);
+	console.log(vaccine.threshold)
+	return await contract.submitTransaction('CreateAsset', vaccine.vaccineId, vaccine.containerId, JSON.stringify(vaccine.threshold), JSON.stringify(vaccine.readings), vaccine.brand, vaccine.owner);
 	
 };
 

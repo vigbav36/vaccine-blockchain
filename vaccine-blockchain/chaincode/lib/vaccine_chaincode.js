@@ -14,8 +14,8 @@ class Chaincode extends Contract{
             docType: 'vaccine',
             vaccineId: vaccineId,
             containerId:containerId,
-			threshold:threshold,
-			readings:readings,
+			threshold: JSON.parse(threshold),
+			readings:JSON.parse(readings),
 			brand: brand,
 			owner: owner,
 			transactionType : 'CREATION'
@@ -220,8 +220,8 @@ class Chaincode extends Contract{
 				ctx,
 				asset.vaccineId,
 				asset.containerId,
-				asset.threshold,
-				asset.readings,
+				JSON.stringify(asset.threshold),
+				JSON.stringify(asset.readings),
 				asset.brand,
 				asset.owner
 			);
