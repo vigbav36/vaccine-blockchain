@@ -1,46 +1,96 @@
 'use strict';
 
 const { Gateway, Wallets } = require('fabric-network');
-const FabricCAServices = require('fabric-ca-client');
 const path = require('path');
 const { buildCAClient, registerAndEnrollUser, enrollAdmin } = require('./CAUtil.js');
-const { buildCCPOrg1, buildWallet } = require('./AppUtil.js');
-
+const { buildWallet, buildCCPOrg } = require('./AppUtil.js');
 const channelName = 'mychannel';
 const chaincodeName = 'ledger';
-const mspOrg1 = 'Org1MSP';
 
-const walletPath = path.join(__dirname, 'wallet');
-const userId = 'appUser';
-
+const FabricCAServices = require('fabric-ca-client');
 
 function prettyJSONString(inputString) {
 	return JSON.stringify(JSON.parse(inputString), null, 2);
 }
 
-async function connectToNetwork(){
+async function getGateway() {
+	console.log('\n--> Building local wallet system and registering admin and sample user');
+  
+	const ccpOrg = buildCCPOrg(process.env.URL_ORG, process.env.CONFIG_FILE_ORG);
+	const caOrgClient = buildCAClient(FabricCAServices, ccpOrg, process.env.CA_ORG);
+	const walletPathOrg = path.join(__dirname, 'wallet');
+	const walletOrg = await buildWallet(Wallets, walletPathOrg);
+	await enrollAdmin(caOrgClient, walletOrg, process.env.MSP_ORG);
+  
 	try {
-		const ccp = buildCCPOrg1();
+		const gatewayOrg = new Gateway();
+		await gatewayOrg.connect(ccpOrg,
+			{ wallet: walletOrg, identity:'admin', discovery: { enabled: true, asLocalhost: true } });
+  
+		console.log(gatewayOrg + " Made gateway");
+		return gatewayOrg;
+  
+	} catch (error) {
+		console.error(`Error in connecting to gateway: ${error}`);
+		process.exit(1);
+	}
+  }
 
-		const wallet = await buildWallet(Wallets, walletPath);
+async function getGatewayAsUser(user_id) {
+	console.log('\n--> Getting user gateway');
+  
+	const ccpOrg = buildCCPOrg(process.env.URL_ORG, process.env.CONFIG_FILE_ORG);
+	const caOrgClient = buildCAClient(FabricCAServices, ccpOrg, process.env.CA_ORG);
+	const walletPathOrg = path.join(__dirname, 'wallet');
+	const walletOrg = await buildWallet(Wallets, walletPathOrg);
+	//await enrollAdmin(caOrgClient, walletOrg, process.env.MSP_ORG);
+  
+	try {
+		const gatewayOrg = new Gateway();
+		await gatewayOrg.connect(ccpOrg,
+			{ wallet: walletOrg, identity:user_id, discovery: { enabled: true, asLocalhost: true } });
+		
+		return gatewayOrg;
+  
+	} catch (error) {
+		console.error(`Error in connecting to gateway: ${error}`);
+		process.exit(1);
+	}
+}
 
-		const gateway = new Gateway();
+async function registerUser(user_id) {
+	try {
+		console.log('\n--> Registering user '+ user_id);
+		const ccpOrg = buildCCPOrg(process.env.URL_ORG, process.env.CONFIG_FILE_ORG);
+		const caOrgClient = buildCAClient(FabricCAServices, ccpOrg, process.env.CA_ORG);
+		const walletPathOrg = path.join(__dirname, 'wallet');
+		const walletOrg = await buildWallet(Wallets, walletPathOrg);
+		await registerAndEnrollUser(caOrgClient, walletOrg,  process.env.MSP_ORG , user_id, process.env.ORG_DEPARTMENT);
+		console.log('\n--> Registered User successfully -  '+ user_id);
 
-		try {
+	} catch (error) {
+		console.error(`Error in connecting to gateway: ${error}`);
+		process.exit(1);
+	}
+}
 
-			await gateway.connect(ccp, {
-				wallet,
-				identity: userId,
-				discovery: { enabled: true, asLocalhost: true } // using asLocalhost as this gateway is using a fabric network deployed locally
-			});
+async function connectToNetworkAsAdmin(){
+	try {
+		const gateway = await getGateway();
+		const network = await gateway.getNetwork(channelName);
+		return network;
+	}
+	catch(error){
+		console.log(error);
+	}
+}
 
-			const network = await gateway.getNetwork(channelName);
 
-			return network;
-		}
-		catch(error){
-			console.log(error);
-		}
+async function connectToNetworkAsUser(user_id){
+	try {
+		const gateway = await getGatewayAsUser(user_id);
+		const network = await gateway.getNetwork(channelName);
+		return network;
 	}
 	catch(error){
 		console.log(error);
@@ -50,7 +100,7 @@ async function connectToNetwork(){
 
 exports.getVaccineHistory = async (vaccine_id) => {
 	console.log("getting history")
-	const network = await connectToNetwork();
+	const network = await connectToNetworkAsAdmin();
 	const contract = network.getContract(chaincodeName);
 
 	const resultBuffer  = await contract.evaluateTransaction('GetAssetHistory', vaccine_id);
@@ -63,7 +113,7 @@ exports.getVaccineHistory = async (vaccine_id) => {
 
 
 exports.getVaccinesByBrand =  async (brand) =>{
-	const network = await connectToNetwork();
+	const network = await connectToNetworkAsAdmin();
 	const contract = network.getContract(chaincodeName);
 	const resultBuffer = await contract.evaluateTransaction('QueryAssetsByBrand', brand);
 	const resultString = resultBuffer.toString('utf8');
@@ -72,7 +122,7 @@ exports.getVaccinesByBrand =  async (brand) =>{
 }
 
 exports.registerViolation = async (vaccine_id, violation) => {
-	const network = await connectToNetwork();
+	const network = await connectToNetworkAsAdmin();
 	const contract = network.getContract(chaincodeName);
   
 	const resultBuffer = await contract.submitTransaction('RegisterViolation', vaccine_id, violation.parameter, violation.value);
@@ -101,7 +151,7 @@ exports.registerViolation = async (vaccine_id, violation) => {
   };
 
 exports.addVaccine = async (vaccine) => {
-	const network = await connectToNetwork();
+	const network = await connectToNetworkAsAdmin();
 	const contract = network.getContract(chaincodeName);
 	console.log(vaccine.threshold)
 	return await contract.submitTransaction('CreateAsset', vaccine.vaccineId, vaccine.containerId, JSON.stringify(vaccine.threshold), JSON.stringify(vaccine.readings), vaccine.brand, vaccine.owner);
@@ -109,7 +159,7 @@ exports.addVaccine = async (vaccine) => {
 };
 
 exports.getVaccine = async (vaccine_id) => {
-	const network = await connectToNetwork();
+	const network = await connectToNetworkAsAdmin();
 	const contract = network.getContract(chaincodeName);
 
 	const resultBuffer = await contract.evaluateTransaction('ReadAsset', vaccine_id);
@@ -117,4 +167,21 @@ exports.getVaccine = async (vaccine_id) => {
 	const resultString = resultBuffer.toString('utf8');
 	const resultJSON = JSON.parse(resultString);
 	return resultJSON;
+}
+
+
+exports.registerUser = async(user_id) =>{
+	await registerUser(user_id);
+}
+
+exports.transferOwner = async(vaccine_id, new_owner, user_id) =>{
+	const network = await connectToNetworkAsUser(user_id);
+	const contract = network.getContract(chaincodeName);
+	await contract.submitTransaction('TransferOwner', vaccine_id);
+}
+
+exports.requestTransfer = async(vaccine_id, user_id) =>{
+	const network = await connectToNetworkAsUser(user_id);
+	const contract = network.getContract(chaincodeName);
+	await contract.submitTransaction('TransferOwnerRequest', vaccine_id);
 }

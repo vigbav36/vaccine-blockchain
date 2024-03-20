@@ -32,7 +32,6 @@ exports.enrollAdmin = async (caClient, wallet, orgMspId) => {
 			console.log('An identity for the admin user already exists in the wallet');
 			return;
 		}
-
 		// Enroll the admin user, and import the new identity into the wallet.
 		const enrollment = await caClient.enroll({ enrollmentID: adminUserId, enrollmentSecret: adminUserPasswd });
 		const x509Identity = {

@@ -3,11 +3,90 @@
 const {Contract} = require('fabric-contract-api');
 
 class Chaincode extends Contract{
+
+
+	async getOrganizationFromId(x509DistinguishedName){
+		try{
+			const parts = x509DistinguishedName.split('/');
+			let orgName;
+			for (const part of parts) {
+				if (part.startsWith('OU=')) {
+					orgName = part.split('=')[1];
+					break;
+				}
+			}
+			return orgName; 
+		}
+		catch(error){
+			return "error"
+		}
+	}
+
+	async verifyClientOrgMatchesPeerOrg(ctx) {
+        const clientMSPID = ctx.clientIdentity.getMSPID();
+        const peerMSPID = ctx.stub.getMspID();
+        if (clientMSPID !== peerMSPID) {
+            return false
+        }
+        return true;
+    }
+
+	async TransferOwner(ctx, vaccineId){
+		let assetAsBytes = await ctx.stub.getState(vaccineId);
+		if (!assetAsBytes || !assetAsBytes.toString()) {
+			throw new Error(`Asset ${vaccineId} does not exist`);
+		}
+		let vaccine = {};
+		vaccine = JSON.parse(assetAsBytes.toString());
+
+		const clientId = ctx.clientIdentity.getID();
+
+		const owner = await this.getOrganizationFromId(clientId);
+		
+		//Current owner must be the one initiating the requests
+		if(clientId!=null &&  owner != vaccine.owner)
+			throw new Error(`error: submitting client (${clientId}) identity does not own asset. Owner is ${vaccine.owner}. Vaccine object is ${vaccine}`);
+		
+		if(!this.verifyClientOrgMatchesPeerOrg(ctx))
+			throw new Error(`Error: Unauthorized transfer`);
+		
+		vaccine['owner'] = vaccine['requesting_owner'];
+		vaccine['requesting_owner'] = "";
+		vaccine['transactionType'] = "TRANSFER_APPROVED"
+
+		await ctx.stub.putState(vaccineId, Buffer.from(JSON.stringify(vaccine)));
+	}
+
+	async TransferOwnerRequest(ctx, vaccineId){
+		let assetAsBytes = await ctx.stub.getState(vaccineId);
+		if (!assetAsBytes || !assetAsBytes.toString()) {
+			throw new Error(`Asset ${vaccineId} does not exist`);
+		}
+		let vaccine = {};
+		vaccine = JSON.parse(assetAsBytes.toString());
+
+		const clientId = ctx.clientIdentity.getID();
+		
+		if(!this.verifyClientOrgMatchesPeerOrg(ctx))
+			throw new Error(`Error: Unauthorized transfer request`);
+		
+		const owner = await this.getOrganizationFromId(clientId.toString());
+
+		vaccine['requesting_owner'] = owner;
+		vaccine['transactionType'] = "TRANSFER_REQUESTED"
+
+		await ctx.stub.putState(vaccineId, Buffer.from(JSON.stringify(vaccine)));
+	}
+
     async CreateAsset(ctx, vaccineId, containerId, threshold, readings, brand, owner) {
         const exists = await this.AssetExists(ctx, vaccineId);
         if (exists) {
             throw new Error(`The asset ${vaccineId} already exists`);
         }
+
+		const clientID = ctx.clientIdentity.getID();
+		const owner = await this.getOrganizationFromId(clientID.toString());
+
 
         // ==== Create asset object and marshal to JSON ====
         let asset = {
@@ -18,6 +97,7 @@ class Chaincode extends Contract{
 			readings:JSON.parse(readings),
 			brand: brand,
 			owner: owner,
+			requesting_owner: "",
 			transactionType : 'CREATION'
         };
 
@@ -36,11 +116,9 @@ class Chaincode extends Contract{
 		if (!assetJSON || assetJSON.length === 0) {
 			throw new Error(`Asset ${id} does not exist`);
 		}
-
 		return assetJSON.toString();
-
 	}
-    
+
     async GetAssetHistory(ctx, vaccineId) {
 
 		let resultsIterator = await ctx.stub.getHistoryForKey(vaccineId);
@@ -151,6 +229,8 @@ class Chaincode extends Contract{
         return ctx.stub.putState(vaccine.vaccineId, Buffer.from(JSON.stringify(vaccine)));
     }
 
+
+
     async InitLedger(ctx) {
 		const assets = [
 			{
@@ -166,6 +246,7 @@ class Chaincode extends Contract{
 				},
 				brand: "pfizer",
 				owner: 'manufacturer',
+				requesting_owner : '',
 				transactionType : 'CREATION'
 			},
 			{
@@ -181,6 +262,7 @@ class Chaincode extends Contract{
 				},
 				brand: "pfizer",
 				owner: 'manufacturer',
+				requesting_owner : '',
 				transactionType : 'CREATION'
 			},	
 			{
@@ -196,6 +278,7 @@ class Chaincode extends Contract{
 				},
 				brand: "medico",
 				owner: 'manufacturer',
+				requesting_owner : '',
 				transactionType : 'CREATION'
 			},	
 			{
@@ -211,6 +294,7 @@ class Chaincode extends Contract{
 				},
 				brand: "medico",
 				owner: 'manufacturer',
+				requesting_owner : '',
 				transactionType : 'CREATION'
 			},		
 		];
