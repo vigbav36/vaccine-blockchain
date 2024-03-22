@@ -18,7 +18,7 @@ async function getGateway() {
   
 	const ccpOrg = buildCCPOrg(process.env.URL_ORG, process.env.CONFIG_FILE_ORG);
 	const caOrgClient = buildCAClient(FabricCAServices, ccpOrg, process.env.CA_ORG);
-	const walletPathOrg = path.join(__dirname, 'wallet');
+	const walletPathOrg = path.join(__dirname, process.env.WALLET_DIR);
 	const walletOrg = await buildWallet(Wallets, walletPathOrg);
 	await enrollAdmin(caOrgClient, walletOrg, process.env.MSP_ORG);
   
@@ -41,7 +41,7 @@ async function getGatewayAsUser(user_id) {
   
 	const ccpOrg = buildCCPOrg(process.env.URL_ORG, process.env.CONFIG_FILE_ORG);
 	const caOrgClient = buildCAClient(FabricCAServices, ccpOrg, process.env.CA_ORG);
-	const walletPathOrg = path.join(__dirname, 'wallet');
+	const walletPathOrg = path.join(__dirname, process.env.WALLET_DIR);
 	const walletOrg = await buildWallet(Wallets, walletPathOrg);
 	//await enrollAdmin(caOrgClient, walletOrg, process.env.MSP_ORG);
   
@@ -63,8 +63,9 @@ async function registerUser(user_id) {
 		console.log('\n--> Registering user '+ user_id);
 		const ccpOrg = buildCCPOrg(process.env.URL_ORG, process.env.CONFIG_FILE_ORG);
 		const caOrgClient = buildCAClient(FabricCAServices, ccpOrg, process.env.CA_ORG);
-		const walletPathOrg = path.join(__dirname, 'wallet');
+		const walletPathOrg = path.join(__dirname, process.env.WALLET_DIR);
 		const walletOrg = await buildWallet(Wallets, walletPathOrg);
+		await enrollAdmin(caOrgClient, walletOrg, process.env.MSP_ORG);
 		await registerAndEnrollUser(caOrgClient, walletOrg,  process.env.MSP_ORG , user_id, process.env.ORG_DEPARTMENT);
 		console.log('\n--> Registered User successfully -  '+ user_id);
 
@@ -151,7 +152,8 @@ exports.registerViolation = async (vaccine_id, violation) => {
   };
 
 exports.addVaccine = async (vaccine) => {
-	const network = await connectToNetworkAsAdmin();
+	//const network = await connectToNetworkAsUser('bavesh');
+	const network = await connectToNetworkAsUser('varsha');
 	const contract = network.getContract(chaincodeName);
 	console.log(vaccine.threshold)
 	return await contract.submitTransaction('CreateAsset', vaccine.vaccineId, vaccine.containerId, JSON.stringify(vaccine.threshold), JSON.stringify(vaccine.readings), vaccine.brand, vaccine.owner);
@@ -174,7 +176,7 @@ exports.registerUser = async(user_id) =>{
 	await registerUser(user_id);
 }
 
-exports.transferOwner = async(vaccine_id, new_owner, user_id) =>{
+exports.transferOwner = async(vaccine_id, user_id) =>{
 	const network = await connectToNetworkAsUser(user_id);
 	const contract = network.getContract(chaincodeName);
 	await contract.submitTransaction('TransferOwner', vaccine_id);

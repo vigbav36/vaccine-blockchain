@@ -5,9 +5,10 @@ const {Contract} = require('fabric-contract-api');
 class Chaincode extends Contract{
 
 
-	async getOrganizationFromId(x509DistinguishedName){
+	async getOrganizationFromId(ctx){
 		try{
-			const parts = x509DistinguishedName.split('/');
+			const name = ctx.clientIdentity.getID()
+			const parts = name.split('/');
 			let orgName;
 			for (const part of parts) {
 				if (part.startsWith('OU=')) {
@@ -20,6 +21,10 @@ class Chaincode extends Contract{
 		catch(error){
 			return "error"
 		}
+	}
+
+	async check(ctx){
+		return ctx.clientIdentity.getID();
 	}
 
 	async verifyClientOrgMatchesPeerOrg(ctx) {
@@ -39,17 +44,24 @@ class Chaincode extends Contract{
 		let vaccine = {};
 		vaccine = JSON.parse(assetAsBytes.toString());
 
-		const clientId = ctx.clientIdentity.getID();
+		const name = ctx.clientIdentity.getID()
+		const parts = name.split('/');
+		let orgName;
 
-		const owner = await this.getOrganizationFromId(clientId);
-		
+		for (const part of parts) {
+			if (part.startsWith('OU=')) {
+				orgName = part.split('=')[1];
+				break;
+			}
+		}
+
 		//Current owner must be the one initiating the requests
-		if(clientId!=null &&  owner != vaccine.owner)
-			throw new Error(`error: submitting client (${clientId}) identity does not own asset. Owner is ${vaccine.owner}. Vaccine object is ${vaccine}`);
+		if(orgName != vaccine['owner'])
+			throw new Error(`error: submitting client (${orgName}) identity does not own asset. Owner is ${vaccine['owner']}. Vaccine object is ${vaccine}`);
 		
-		if(!this.verifyClientOrgMatchesPeerOrg(ctx))
-			throw new Error(`Error: Unauthorized transfer`);
-		
+		const clientMSPID = ctx.clientIdentity.getMSPID();
+        const peerMSPID = ctx.stub.getMspID();
+     
 		vaccine['owner'] = vaccine['requesting_owner'];
 		vaccine['requesting_owner'] = "";
 		vaccine['transactionType'] = "TRANSFER_APPROVED"
@@ -65,14 +77,21 @@ class Chaincode extends Contract{
 		let vaccine = {};
 		vaccine = JSON.parse(assetAsBytes.toString());
 
-		const clientId = ctx.clientIdentity.getID();
+		const name = ctx.clientIdentity.getID()
+		const parts = name.split('/');
+		let orgName;
+
+		for (const part of parts) {
+			if (part.startsWith('OU=')) {
+				orgName = part.split('=')[1];
+				break;
+			}
+		}
 		
 		if(!this.verifyClientOrgMatchesPeerOrg(ctx))
 			throw new Error(`Error: Unauthorized transfer request`);
 		
-		const owner = await this.getOrganizationFromId(clientId.toString());
-
-		vaccine['requesting_owner'] = owner;
+		vaccine['requesting_owner'] = orgName;
 		vaccine['transactionType'] = "TRANSFER_REQUESTED"
 
 		await ctx.stub.putState(vaccineId, Buffer.from(JSON.stringify(vaccine)));
@@ -84,19 +103,28 @@ class Chaincode extends Contract{
             throw new Error(`The asset ${vaccineId} already exists`);
         }
 
-		const clientID = ctx.clientIdentity.getID();
-		const owner = await this.getOrganizationFromId(clientID.toString());
+		
+		const name = ctx.clientIdentity.getID()
+		const parts = name.split('/');
+		let orgName;
+		for (const part of parts) {
+			if (part.startsWith('OU=')) {
+				orgName = part.split('=')[1];
+				break;
+			}
+		}
+ 
 
+		const ownerId =  orgName
 
-        // ==== Create asset object and marshal to JSON ====
         let asset = {
             docType: 'vaccine',
             vaccineId: vaccineId,
             containerId:containerId,
 			threshold: JSON.parse(threshold),
 			readings:JSON.parse(readings),
-			brand: brand,
-			owner: owner,
+			brand: name,
+			owner: ownerId,
 			requesting_owner: "",
 			transactionType : 'CREATION'
         };

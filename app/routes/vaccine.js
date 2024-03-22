@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-const {getVaccinesByBrand , registerViolations, getVaccineHistory, addVaccine, getVaccine, transferOwner, registerUser}= require("../application/vaccine.js")
+const {getVaccinesByBrand , registerViolations, getVaccineHistory, addVaccine, getVaccine, transferOwner, registerUser, requestTransfer}= require("../application/vaccine.js")
 var requireAuth = require('../application/middleWare');
 const session = require('express-session');
 
@@ -55,9 +55,9 @@ router.post('/violation', requireAuth, async function(req, res){
 
 router.post('/transfer', requireAuth, async function(req, res){
     try{
-        const { vaccine_id, new_owner } = req.body;
-        await transferOwner(vaccine_id, new_owner);
-        const result = await getVaccine(req.params.vaccine_id);
+        const { vaccine_id } = req.body;
+        await transferOwner(vaccine_id, req.session.username);
+        const result = await getVaccine(vaccine_id);
         res.status(200).json(result);
     }
     catch(error){
@@ -83,9 +83,10 @@ router.post('/register', requireAuth, async function(req, res){
 
 router.post('/request', requireAuth, async function(req, res){
     try{
-        const {user_id} = req.body;
-        await registerUser(user_id);
-        res.status(200).json({message : 'Succesfully registered user'});
+        const { vaccine_id } = req.body;
+        await requestTransfer(vaccine_id, req.session.username);
+        const result = await getVaccine(vaccine_id);
+        res.status(200).json(result);
     }
     catch(error){
         console.error('Error processing request:', error);
