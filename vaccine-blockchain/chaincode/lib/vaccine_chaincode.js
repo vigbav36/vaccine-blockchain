@@ -3,21 +3,129 @@
 const {Contract} = require('fabric-contract-api');
 
 class Chaincode extends Contract{
+
+
+	async getOrganizationFromId(ctx){
+		try{
+			const name = ctx.clientIdentity.getID()
+			const parts = name.split('/');
+			let orgName;
+			for (const part of parts) {
+				if (part.startsWith('OU=')) {
+					orgName = part.split('=')[1];
+					break;
+				}
+			}
+			return orgName; 
+		}
+		catch(error){
+			return "error"
+		}
+	}
+
+	async check(ctx){
+		return ctx.clientIdentity.getID();
+	}
+
+	async verifyClientOrgMatchesPeerOrg(ctx) {
+        const clientMSPID = ctx.clientIdentity.getMSPID();
+        const peerMSPID = ctx.stub.getMspID();
+        if (clientMSPID !== peerMSPID) {
+            return false
+        }
+        return true;
+    }
+
+	async TransferOwner(ctx, vaccineId){
+		let assetAsBytes = await ctx.stub.getState(vaccineId);
+		if (!assetAsBytes || !assetAsBytes.toString()) {
+			throw new Error(`Asset ${vaccineId} does not exist`);
+		}
+		let vaccine = {};
+		vaccine = JSON.parse(assetAsBytes.toString());
+
+		const name = ctx.clientIdentity.getID()
+		const parts = name.split('/');
+		let orgName;
+
+		for (const part of parts) {
+			if (part.startsWith('OU=')) {
+				orgName = part.split('=')[1];
+				break;
+			}
+		}
+
+		//Current owner must be the one initiating the requests
+		if(orgName != vaccine['owner'])
+			throw new Error(`error: submitting client (${orgName}) identity does not own asset. Owner is ${vaccine['owner']}. Vaccine object is ${vaccine}`);
+		
+		const clientMSPID = ctx.clientIdentity.getMSPID();
+        const peerMSPID = ctx.stub.getMspID();
+     
+		vaccine['owner'] = vaccine['requesting_owner'];
+		vaccine['requesting_owner'] = "";
+		vaccine['transactionType'] = "TRANSFER_APPROVED"
+
+		await ctx.stub.putState(vaccineId, Buffer.from(JSON.stringify(vaccine)));
+	}
+
+	async TransferOwnerRequest(ctx, vaccineId){
+		let assetAsBytes = await ctx.stub.getState(vaccineId);
+		if (!assetAsBytes || !assetAsBytes.toString()) {
+			throw new Error(`Asset ${vaccineId} does not exist`);
+		}
+		let vaccine = {};
+		vaccine = JSON.parse(assetAsBytes.toString());
+
+		const name = ctx.clientIdentity.getID()
+		const parts = name.split('/');
+		let orgName;
+
+		for (const part of parts) {
+			if (part.startsWith('OU=')) {
+				orgName = part.split('=')[1];
+				break;
+			}
+		}
+		
+		if(!this.verifyClientOrgMatchesPeerOrg(ctx))
+			throw new Error(`Error: Unauthorized transfer request`);
+		
+		vaccine['requesting_owner'] = orgName;
+		vaccine['transactionType'] = "TRANSFER_REQUESTED"
+
+		await ctx.stub.putState(vaccineId, Buffer.from(JSON.stringify(vaccine)));
+	}
+
     async CreateAsset(ctx, vaccineId, containerId, threshold, readings, brand, owner) {
         const exists = await this.AssetExists(ctx, vaccineId);
         if (exists) {
             throw new Error(`The asset ${vaccineId} already exists`);
         }
 
-        // ==== Create asset object and marshal to JSON ====
+		
+		const name = ctx.clientIdentity.getID()
+		const parts = name.split('/');
+		let orgName;
+		for (const part of parts) {
+			if (part.startsWith('OU=')) {
+				orgName = part.split('=')[1];
+				break;
+			}
+		}
+ 
+
+		const ownerId =  orgName
+
         let asset = {
             docType: 'vaccine',
             vaccineId: vaccineId,
             containerId:containerId,
-			threshold:threshold,
-			readings:readings,
-			brand: brand,
-			owner: owner,
+			threshold: JSON.parse(threshold),
+			readings:JSON.parse(readings),
+			brand: name,
+			owner: ownerId,
+			requesting_owner: "",
 			transactionType : 'CREATION'
         };
 
@@ -36,11 +144,9 @@ class Chaincode extends Contract{
 		if (!assetJSON || assetJSON.length === 0) {
 			throw new Error(`Asset ${id} does not exist`);
 		}
-
 		return assetJSON.toString();
-
 	}
-    
+
     async GetAssetHistory(ctx, vaccineId) {
 
 		let resultsIterator = await ctx.stub.getHistoryForKey(vaccineId);
@@ -151,6 +257,8 @@ class Chaincode extends Contract{
         return ctx.stub.putState(vaccine.vaccineId, Buffer.from(JSON.stringify(vaccine)));
     }
 
+
+
     async InitLedger(ctx) {
 		const assets = [
 			{
@@ -166,6 +274,7 @@ class Chaincode extends Contract{
 				},
 				brand: "pfizer",
 				owner: 'manufacturer',
+				requesting_owner : '',
 				transactionType : 'CREATION'
 			},
 			{
@@ -181,6 +290,7 @@ class Chaincode extends Contract{
 				},
 				brand: "pfizer",
 				owner: 'manufacturer',
+				requesting_owner : '',
 				transactionType : 'CREATION'
 			},	
 			{
@@ -196,6 +306,7 @@ class Chaincode extends Contract{
 				},
 				brand: "medico",
 				owner: 'manufacturer',
+				requesting_owner : '',
 				transactionType : 'CREATION'
 			},	
 			{
@@ -211,6 +322,7 @@ class Chaincode extends Contract{
 				},
 				brand: "medico",
 				owner: 'manufacturer',
+				requesting_owner : '',
 				transactionType : 'CREATION'
 			},		
 		];
@@ -220,8 +332,8 @@ class Chaincode extends Contract{
 				ctx,
 				asset.vaccineId,
 				asset.containerId,
-				asset.threshold,
-				asset.readings,
+				JSON.stringify(asset.threshold),
+				JSON.stringify(asset.readings),
 				asset.brand,
 				asset.owner
 			);
