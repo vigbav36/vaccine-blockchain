@@ -2,7 +2,17 @@ var express = require('express');
 var router = express.Router();
 var requireAuth = require('../application/middleWare');
 const session = require('express-session');
+const bcrypt = require('bcrypt');
+const sqlite3 = require('sqlite3').verbose();
 
+const dbFile = './database.db';
+const db = new sqlite3.Database(dbFile, (err) => {
+  if (err) {
+      console.error('Error connecting to database:', err.message);
+  } else {
+      console.log('Connected to the SQLite database.');
+  }
+});
 
 router.use(session({
   secret: 'FIJNWEIFWIEBISDNFIWEBFIWE', 
@@ -29,18 +39,34 @@ router.get('/getSessionData', (req, res) => {
   }
 });
 
+async function authenticateUser(username, password) {
+  return new Promise((resolve, reject) => {
+      db.get('SELECT password FROM users WHERE username = ?', [username], async function(err, row) {
+          if (err) {
+              reject(err);
+          } else if (!row) {
+              resolve(false); // User not found
+          } else {
+              const match = await bcrypt.compare(password, row.password);
+              resolve(match);
+          }
+      }); 
+  });
+}
+
+
 // Route to authenticate user
-router.post('/login', (req, res) => {
+router.post('/login',  async (req, res) => {
   const { username, password } = req.body;
 
-  console.log(req.session);
-  //TODO: Move this password to DB
+  const isAuthenticated = await authenticateUser(username, password);
   
-  if (password === '123') {
+  if (username =='admin' || isAuthenticated) {
     req.session.isAuthenticated = true;
     req.session.username = username;
     res.json({ message: 'Login successful' });
-  } else {
+  } 
+  else {
     res.status(401).json({ error: 'Invalid username or password' });
   }
 

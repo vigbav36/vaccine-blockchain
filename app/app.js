@@ -17,6 +17,12 @@ var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var vaccineRouter = require('./routes/vaccine');
 
+const sqlite3 = require('sqlite3').verbose();
+
+
+
+const fs = require('fs');
+
 
 var app = express();
 
@@ -34,6 +40,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/vaccine', vaccineRouter);
+
+const dbFile = './database.db';
+if (!fs.existsSync(dbFile)) {
+    fs.closeSync(fs.openSync(dbFile, 'w'));
+}
 
 app.use(session({
   secret: 'FIJNWEIFWIEBISDNFIWEBFIWE', 
@@ -61,6 +72,29 @@ app.use(function(err, req, res, next) {
 });
 
 
+const db = new sqlite3.Database(dbFile, (err) => {
+  if (err) {
+      console.error('Error connecting to database:', err.message);
+  } else {
+      console.log('Connected to the SQLite database.');
+      createTables();
+  }
+});
 
+function createTables() {
+  db.run(`CREATE TABLE IF NOT EXISTS users (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          username TEXT,
+          password TEXT
+      )`, (err) => {
+      if (err) {
+          console.error('Error creating user table:', err.message);
+      } else {
+          console.log('User table created successfully.');
+      }
+  });
+}
+  
+createTables()
 
 module.exports = app;

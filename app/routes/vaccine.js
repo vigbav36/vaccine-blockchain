@@ -3,6 +3,17 @@ var router = express.Router();
 const {getVaccinesByBrand , registerViolations, getVaccineHistory, addVaccine, getVaccine, transferOwner, registerUser, requestTransfer}= require("../application/vaccine.js")
 var requireAuth = require('../application/middleWare');
 const session = require('express-session');
+const bcrypt = require('bcrypt');
+const sqlite3 = require('sqlite3').verbose();
+
+const dbFile = './database.db';
+const db = new sqlite3.Database(dbFile, (err) => {
+    if (err) {
+        console.error('Error connecting to database:', err.message);
+    } else {
+        console.log('Connected to the SQLite database.');
+    }
+  });
 
 router.use(session({
     secret: 'FIJNWEIFWIEBISDNFIWEBFIWE', 
@@ -66,13 +77,28 @@ router.post('/transfer', requireAuth, async function(req, res){
     }
 });
 
+async function registerUserDB(username, password) {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    return new Promise((resolve, reject) => {
+        db.run('INSERT INTO users (username, password) VALUES (?, ?)', [username, hashedPassword], function (err) {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(this.lastID);
+            }
+        });
+    });
+}
+
 router.post('/register', requireAuth, async function(req, res){
     try{
         if(req.session.username != 'admin')
             return res.status(400).json({error:'Not authorized, only admin has access'});
 
-        const {user_id} = req.body;
-        await registerUser(user_id);
+        const {user_id, user_password} = req.body;
+        await registerUserDB(user_id, user_password);
+
+        //await registerUser(user_id);
         res.status(200).json({message : 'Succesfully registered user'});
     }
     catch(error){
