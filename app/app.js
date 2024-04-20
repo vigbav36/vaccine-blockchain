@@ -1,9 +1,5 @@
-
-
 const dotenv = require('dotenv');
 dotenv.config({ path: '.env' });
-
-
 
 var createError = require('http-errors');
 var express = require('express');
@@ -12,11 +8,13 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const bodyParser = require('body-parser');
+const cors = require('cors'); // Import the cors package
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var vaccineRouter = require('./routes/vaccine');
 
+<<<<<<< Updated upstream
 const sqlite3 = require('sqlite3').verbose();
 
 
@@ -24,6 +22,8 @@ const sqlite3 = require('sqlite3').verbose();
 const fs = require('fs');
 
 
+=======
+>>>>>>> Stashed changes
 var app = express();
 
 // view engine setup
@@ -37,6 +37,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+<<<<<<< Updated upstream
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/vaccine', vaccineRouter);
@@ -46,6 +47,8 @@ if (!fs.existsSync(dbFile)) {
     fs.closeSync(fs.openSync(dbFile, 'w'));
 }
 
+=======
+>>>>>>> Stashed changes
 app.use(session({
   secret: 'FIJNWEIFWIEBISDNFIWEBFIWE', 
   resave: false,
@@ -54,6 +57,11 @@ app.use(session({
 
 app.use(bodyParser.json());
 
+// Use cors middleware to accept requests from localhost:4200
+app.use(cors())
+app.use('/', indexRouter);
+app.use('/users', usersRouter);
+app.use('/vaccine', vaccineRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -63,6 +71,7 @@ app.use(function(req, res, next) {
 // error handler
 app.use(function(err, req, res, next) {
   // set locals, only providing error in development
+  res.setHeader('Referrer-Policy', 'no-referrer-when-downgrade');
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
 
@@ -71,6 +80,7 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
+<<<<<<< Updated upstream
 
 const db = new sqlite3.Database(dbFile, (err) => {
   if (err) {
@@ -97,4 +107,6 @@ function createTables() {
   
 createTables()
 
+=======
+>>>>>>> Stashed changes
 module.exports = app;

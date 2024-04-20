@@ -123,7 +123,7 @@ class Chaincode extends Contract{
             containerId:containerId,
 			threshold: JSON.parse(threshold),
 			readings:JSON.parse(readings),
-			brand: name,
+			brand: brand,
 			owner: ownerId,
 			requesting_owner: "",
 			transactionType : 'CREATION'
@@ -243,8 +243,13 @@ class Chaincode extends Contract{
 			jsonResp.error = 'Failed to decode JSON of: ' + vaccineId;
 			throw new Error(jsonResp);
 		}
-        assetToTransfer['readings'][parameterName] = parameterValue;
-		assetToTransfer['transactionType'] = "VIOLATION_TEMPERATURE"        
+		if(parameterName == "opening"){
+			assetToTransfer['transactionType'] = "VIOLATION_OPENING"  
+		}
+		else{
+			assetToTransfer['readings'][parameterName] = parameterValue;
+			assetToTransfer['transactionType'] = "VIOLATION_TEMPERATURE"  
+		}      
 		await ctx.stub.putState(vaccineId, Buffer.from(JSON.stringify(assetToTransfer)));
         return assetToTransfer;
     }

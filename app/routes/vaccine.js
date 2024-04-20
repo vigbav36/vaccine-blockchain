@@ -46,7 +46,7 @@ router.post('/', requireAuth,  async function(req, res){
     res.status(200).json(await getVaccineHistory(vaccine.vaccineId))
 });
 
-router.post('/violation', requireAuth, async function(req, res){
+router.post('/violation', async function(req, res){
     try {
         const { vaccine_id, violations } = req.body;
 

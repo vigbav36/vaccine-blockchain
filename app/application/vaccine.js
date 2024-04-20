@@ -153,7 +153,7 @@ exports.registerViolation = async (vaccine_id, violation) => {
 
 exports.addVaccine = async (vaccine) => {
 	//const network = await connectToNetworkAsUser('bavesh');
-	const network = await connectToNetworkAsUser('varsha');
+	const network = await connectToNetworkAsUser('sumon');
 	const contract = network.getContract(chaincodeName);
 	console.log(vaccine.threshold)
 	return await contract.submitTransaction('CreateAsset', vaccine.vaccineId, vaccine.containerId, JSON.stringify(vaccine.threshold), JSON.stringify(vaccine.readings), vaccine.brand, vaccine.owner);
