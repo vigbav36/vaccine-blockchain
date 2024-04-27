@@ -1,3 +1,20 @@
+# Software Requirements
+
+- **Docker**: Docker is a platform for developing, shipping, and running applications using containerization.
+- **Ubuntu or WSL (Windows Subsystem for Linux)**: Ubuntu is a popular Linux distribution, while WSL allows running Linux distributions on Windows seamlessly.
+- **Node.js**: Node.js is a JavaScript runtime built on Chrome's V8 JavaScript engine, commonly used for building server-side applications.
+- **Postman**: Postman is a collaboration platform for API development, allowing users to design, mock, test, and monitor APIs.
+
+# Hardware Requirements
+
+- **ESP32 controller**: ESP32 is a series of low-cost, low-power system-on-chip microcontrollers with integrated Wi-Fi and dual-mode Bluetooth.
+- **DHT sensor**: The DHT series of sensors are used for measuring temperature and humidity.
+- **GY30 light sensor**: GY30 is a light intensity sensor module that measures the intensity of light.
+- **Breadboard**: A breadboard is a solderless device for temporary circuit prototyping.
+- **Wires**: Wires are used for connecting components on the breadboard and to the ESP32 controller.
+- **A box**: A box that acts like a vaccine container
+
+
 # Vaccine Blockchain
 
 Implementation of a blockchain network for vaccine supply chain and a node application that is connected to this network
