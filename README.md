@@ -34,24 +34,30 @@ Implementation of a blockchain network for vaccine supply chain and a node appli
  Chaincode initialization is not required
  ```
 
-## Running app
+## Running the express.js application
 
-### Go to vaccine-blockchain/application from test-network
+### Go to app from test-network
 
   ```bash
-  cd ../vaccine-blockchain/application
+  cd ../app
   ```
 
-### Delete the wallet directory if present 
+### Delete the wallet directories if present 
 
 ```bash
-rm -r wallet
+rm -r wallet1
+rm -r wallet2
 ```
+### Install necessary packages
 
-###Run the vaccine.js file
- ```bash
-  node vaccine.js
+  ```bash
+  npm install
   ```
+
+### Start the server
+ ```bash
+  DEBUG=express:* node app.js
+ ```
 
 
 Note - If access denied error pops up, make sure you have deleted the wallet directory and re run vaccine.js
