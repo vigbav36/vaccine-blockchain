@@ -1,0 +1,49 @@
+<div class="notification-container" *ngIf = "showPopup">
+  <span><i class = "fa-solid fa-circle-exclamation"></i>Vaccine has been successfully added</span>
+</div>
+<div class="container">
+  <div class="add-vaccine-container">
+    <h4>Add Vaccine</h4>
+  </div>
+  <div class="add-vaccine-container">
+    <form action="" (ngSubmit)="addVaccine()" #addVaccineForm = "ngForm">
+      <div class="form-container">
+        <div class="id">
+          <div class="form-group">
+            <label for="" class="form-label">Vaccine ID</label>
+            <input name = "vaccineId" [(ngModel)]="vaccineDetails.vaccine.vaccineId" type="text" class="form-control" placeholder="Enter the vaccine ID">
+          </div>
+          <div class="form-group">
+            <label for="" class="form-label">Container ID</label>
+            <input name = "containerId" [(ngModel)]="vaccineDetails.vaccine.containerId" type="text" class="form-control" placeholder="Enter the container ID">
+          </div>
+        </div>
+      </div>
+      <hr>
+      <div class="form-bottom-container">
+        <div class="threshold-form">
+          <span class="threshold">Threshold</span>
+          <div class="form-group threshold-container">
+            <label for="">Temperature</label>
+            <input name = "temperature" [(ngModel)]="vaccineDetails.vaccine.threshold.temperature" type="text" class="form-control" placeholder="Enter temperature(°C)">
+          </div>
+          <div class="form-group threshold-container">
+            <label for="">Humidity</label>
+            <input name = "humidity"  [(ngModel)]="vaccineDetails.vaccine.threshold.humidity"  type="text" class="form-control" placeholder="Enter Humidity(%)">
+          </div>
+        </div>
+
+        <div class="brand-form">
+          <div class="form-group ">
+            <label for="" class="form-label">Brand Name</label>
+            <input name = "brand"   [(ngModel)]="vaccineDetails.vaccine.brand" type="text" class="form-control" placeholder="Enter the brand name">
+          </div>
+        </div>
+      </div>
+      <div class="button-container">
+      <button type="submit" class = "btn btn-primary submit-btn">Submit</button>
+
+      </div>
+    </form>
+  </div>
+</div>

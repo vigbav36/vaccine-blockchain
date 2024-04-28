@@ -1,0 +1,17 @@
+.card{
+  height: 100%;
+  border: 0;
+  margin-top: 1rem;
+}
+table{
+  /* height: 75vh; */
+  height: 100%;
+}
+li{
+  list-style-type: none;
+}
+td{
+  padding:20px;
+
+}
+

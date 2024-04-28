@@ -1,0 +1,14 @@
+
+<div class="dashboard">
+  <div class="sidebar">
+    <app-sidebar (onSectionSelected)="changeSection($event)"></app-sidebar>
+  </div>
+  <div class="body">
+    <app-vaccine-details *ngIf = "selected == 0"></app-vaccine-details>
+    <app-add-vaccine *ngIf = "selected == 1"></app-add-vaccine>
+    <app-requests *ngIf = "selected == 2"></app-requests>
+    <app-register-violation *ngIf = "selected == 3"></app-register-violation>
+
+  </div>
+</div>
+

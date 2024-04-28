@@ -1,0 +1,35 @@
+
+.search-bar-container{
+  margin: 1rem 0;
+  padding: 1.5rem;
+  border-radius: 13px ;
+  background-color: white;
+  -webkit-border-radius: 13px ;
+  -moz-border-radius: 13px ;
+  -ms-border-radius: 13px ;
+  -o-border-radius: 13px ;
+}
+input, select{
+  min-width: 12rem;
+}
+.form{
+  display: flex;
+  justify-content: space-around;
+}
+.submit-btn{
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  width: 10rem;
+  border-radius: 5px;
+  background-color: var(--primary-color);
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  -ms-border-radius: 5px;
+  -o-border-radius: 5px;
+}
+
+.submit-btn i{
+  /* align-self: left; */
+  /* margin-right: 1.5rem; */
+}

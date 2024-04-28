@@ -1,0 +1,96 @@
+.container{
+  overflow-y: hidden;
+  height: 100%;
+  display: grid;
+  grid-template-rows: 0.4fr 0.6fr;
+}
+
+button{
+  background-color: var(--primary-color);
+}
+
+h4{
+  font-weight: bold;
+}
+
+.requests{
+  margin: 1rem 0;
+  padding: 1.5rem;
+  border-radius: 13px ;
+  background-color: white;
+}
+.request-form{
+  margin-top: 3rem;
+  padding-right: 10rem;
+  display: flex;
+  justify-content: space-between;
+}
+
+
+.notification{
+  margin-left: 10px;
+  scale: 0.9;
+  display: inline-block;
+  text-align: center;
+  /* font-size: 12px; */
+  color: white;
+  border-radius: 100%;
+  aspect-ratio: 1;
+  width: 30px;
+  background-color: red;
+
+}
+.incoming-request{
+  border: 1px solid rgb(207, 207, 207);
+  border-radius: 11px;
+  padding: 10px 0;
+  display: flex;
+  margin: 10px 0;
+  justify-content: space-between;
+  align-items: center;
+  -webkit-border-radius: 11px;
+  -moz-border-radius: 11px;
+  -ms-border-radius: 11px;
+  -o-border-radius: 11px;
+}
+.request-details{
+  display: flex;
+}
+
+.request-details div{
+  margin-inline: 3rem;
+}
+
+
+.request-choice{
+  display: flex;
+  justify-content: space-around;
+}
+
+.request-choice div{
+  margin-inline: 10px;
+}
+.choice-btn{
+  width:5rem;
+}
+.reject-btn{
+  border: none;
+  background-color: red;
+}
+.notification-container{
+  position: absolute;
+  background-color: var(--primary-color);
+  padding: 1rem;
+  top: 30px;
+  color: white;
+  right: 10px;
+  border-radius: 12px;
+  -webkit-border-radius: 12px;
+  -moz-border-radius: 12px;
+  -ms-border-radius: 12px;
+  -o-border-radius: 12px;
+}
+.notification-container i{
+  font-size: 22px;
+  margin-right: 10px;
+}

@@ -1,0 +1,100 @@
+h4{
+  font-weight: bold;
+}
+label{
+  width: 100px;
+}
+.form-label{
+  margin-left: 10px;
+  font-weight: bold;
+}
+input{
+  width: 20rem;
+}
+hr{
+  margin: 5rem 0;
+}
+.container{
+  overflow-y: hidden;
+  height: 100%;
+  display: grid;
+  grid-template-rows: 0.1fr 1fr;
+}
+
+.add-vaccine-container{
+  margin: 1rem 0;
+  padding: 1.5rem;
+  border-radius: 13px ;
+  background-color: white;
+  -webkit-border-radius: 13px ;
+  -moz-border-radius: 13px ;
+  -ms-border-radius: 13px ;
+  -o-border-radius: 13px ;
+}
+
+.form-container{
+  padding-right: 10rem;
+
+  /* flex-direction: column; */
+}
+.form-bottom-container{
+  padding-right: 10rem;
+
+  display: flex;
+  justify-content: space-between;
+}
+.id{
+  display: flex;
+  justify-content: space-between;
+}
+
+.threshold{
+  font-size: 24px;
+  font-weight: bold;
+}
+.threshold-container{
+  margin: 1rem 0;
+}
+.threshold-container .form-control{
+  display: inline;
+  margin-left: 5rem;
+}
+.brand-form{
+  margin-top: 3rem;
+}
+
+.inline-input{
+
+}
+.add-vaccine-form{
+
+}
+.button-container{
+  margin-top: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.submit-btn{
+  width: 7rem;
+  text-align: center;
+  border-radius: 13px;
+  background-color: var(--primary-color);
+}
+.notification-container{
+  position: absolute;
+  background-color: var(--primary-color);
+  padding: 1rem;
+  top: 30px;
+  color: white;
+  right: 10px;
+  border-radius: 12px;
+  -webkit-border-radius: 12px;
+  -moz-border-radius: 12px;
+  -ms-border-radius: 12px;
+  -o-border-radius: 12px;
+}
+.notification-container i{
+  font-size: 22px;
+  margin-right: 10px;
+}

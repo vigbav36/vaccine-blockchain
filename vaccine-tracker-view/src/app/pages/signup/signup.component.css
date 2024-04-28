@@ -1,0 +1,86 @@
+img{
+  height: 100%;
+}
+input{
+  /* border: 2px solid black; */
+  border-radius: 13px;
+  -webkit-border-radius: 13px;
+  -moz-border-radius: 13px;
+  -ms-border-radius: 13px;
+  -o-border-radius: 13px;
+}
+button, input, .input-group{
+  width: 80%;
+}
+.app-title{
+  font-size: 26px;
+  font-weight: 300;
+  letter-spacing: 5px;
+}
+
+.login-page{
+  overflow-y: hidden;
+  height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.login-details{
+
+  padding: 1rem 0;
+  padding-left: 5rem
+}
+.page-header{
+  font-weight: 400;
+  color: var(--primary-color);
+
+}
+.input-label{
+  font-weight: 400;
+  font-size: 18px;
+  margin-inline: 6px;
+  margin-bottom: 5px;
+}
+.input-group-append{
+  border: none;
+}
+
+.input-group-text{
+  background-color: inherit;
+  border-radius:0 13px 13px 0;
+  display: flex;
+  justify-content: center;
+}
+i{
+  font-size: 20px;
+  padding-inline: 10px;
+}
+.page-header{
+  font-size:64px
+}
+
+.login-form{
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2.5rem;
+}
+
+.submit-btn{
+  border-radius: 13px;
+
+  background-color: var(--primary-color);
+}
+.helper-text{
+  margin-top: 1rem;
+  font-weight: 400;
+}
+
+.submit-container{
+  /* margin-top: 3rem; */
+}
+.link{
+  cursor: pointer;
+  text-decoration: underline;
+  color: var(--primary-color);
+}
