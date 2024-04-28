@@ -8,6 +8,7 @@ const channelName = 'mychannel';
 const chaincodeName = 'ledger';
 
 const FabricCAServices = require('fabric-ca-client');
+const session = require('express-session');
 
 function prettyJSONString(inputString) {
 	return JSON.stringify(JSON.parse(inputString), null, 2);
@@ -103,11 +104,30 @@ exports.getVaccineHistory = async (vaccine_id) => {
 	console.log("getting history")
 	const network = await connectToNetworkAsAdmin();
 	const contract = network.getContract(chaincodeName);
-
+	// result = await contract.evaluateTransaction('QueryAssetsByBrand', 'medico');
 	const resultBuffer  = await contract.evaluateTransaction('GetAssetHistory', vaccine_id);
 
 	const resultString = resultBuffer.toString('utf8');
 
+	const resultJSON = JSON.parse(resultString);
+	return resultJSON
+}
+exports.getAllVaccines = async () => {
+	console.log("getting history")
+	const network = await connectToNetworkAsAdmin();
+	const contract = network.getContract(chaincodeName);
+	const resultBuffer  = await contract.evaluateTransaction('QueryAllVaccines');
+	const resultString = resultBuffer.toString('utf8');
+	const resultJSON = JSON.parse(resultString);
+	return resultJSON
+}
+
+exports.getAllVaccinesContainer = async (container_id) => {
+	console.log("getting history")
+	const network = await connectToNetworkAsAdmin();
+	const contract = network.getContract(chaincodeName);
+	const resultBuffer  = await contract.evaluateTransaction('QueryAllVaccinesContainer', container_id);
+	const resultString = resultBuffer.toString('utf8');
 	const resultJSON = JSON.parse(resultString);
 	return resultJSON
 }
@@ -142,21 +162,26 @@ exports.registerViolation = async (vaccine_id, violation) => {
   };
   
 
-  exports.registerViolations = async (vaccine_id, violations) => {
-	var result = [];
+  exports.registerViolations = async (vaccine_id, violations, result) => {
+	var resultt = [];
 	for (let i = 0; i < violations.length; i++) {
+	  console.log(result);
 	  const violation = violations[i];
-	  result.push(await exports.registerViolation(vaccine_id, violation)); // Fix the function name here
+	  console.log("TESTTTT" + parseInt(result['threshold']['temperature']) +" "+parseInt(violation['value']))
+	  if(violation["parameter"] == "temperature" && parseInt(result['threshold']['temperature']) < parseInt(violation['value'])){
+		
+		resultt.push(await exports.registerViolation(vaccine_id, violation)); // Fix the function name here
+	  }
+	  else if(violation["parameter"] != "temperature")	
+		resultt.push(await exports.registerViolation(vaccine_id, violation));
 	}
-	return result;
+	return resultt;
   };
 
-exports.addVaccine = async (vaccine) => {
-	//const network = await connectToNetworkAsUser('bavesh');
-	const network = await connectToNetworkAsUser('varsha');
+exports.addVaccine = async (vaccine, user) => {
+	const network = await connectToNetworkAsUser(user);
 	const contract = network.getContract(chaincodeName);
-	console.log(vaccine.threshold)
-	return await contract.submitTransaction('CreateAsset', vaccine.vaccineId, vaccine.containerId, JSON.stringify(vaccine.threshold), JSON.stringify(vaccine.readings), vaccine.brand, vaccine.owner);
+	return await contract.submitTransaction('CreateAsset', vaccine.vaccineId, vaccine.containerId, JSON.stringify(vaccine.threshold), vaccine.brand);
 	
 };
 
