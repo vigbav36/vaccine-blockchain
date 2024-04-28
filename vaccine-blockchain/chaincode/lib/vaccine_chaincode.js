@@ -97,7 +97,7 @@ class Chaincode extends Contract{
 		await ctx.stub.putState(vaccineId, Buffer.from(JSON.stringify(vaccine)));
 	}
 
-    async CreateAsset(ctx, vaccineId, containerId, threshold, readings, brand, owner) {
+    async CreateAsset(ctx, vaccineId, containerId, threshold, brand) {
         const exists = await this.AssetExists(ctx, vaccineId);
         if (exists) {
             throw new Error(`The asset ${vaccineId} already exists`);
@@ -122,9 +122,8 @@ class Chaincode extends Contract{
             vaccineId: vaccineId,
             containerId:containerId,
 			threshold: JSON.parse(threshold),
-			readings:JSON.parse(readings),
 			brand: brand,
-			owner: ownerId,
+			owner: orgName,
 			requesting_owner: "",
 			transactionType : 'CREATION'
         };
@@ -202,11 +201,42 @@ class Chaincode extends Contract{
 		return JSON.stringify(results);
 	}
 
-    async QueryAssetsByBrand(ctx, brand) {
+    async QueryAllVaccines(ctx) {
 		let queryString = {};
 		queryString.selector = {};
 		queryString.selector.docType = 'vaccine';
-		queryString.selector.brand = brand;
+		return await this.GetQueryResultForQueryString(ctx, JSON.stringify(queryString)); //shim.success(queryResults);
+	}
+
+	async QueryAllVaccinesByOrg(ctx) {
+		let queryString = {};
+		queryString.selector = {};
+		queryString.selector.docType = 'vaccine';
+
+
+		const name = ctx.clientIdentity.getID()
+		const parts = name.split('/');
+		let orgName;
+		for (const part of parts) {
+			if (part.startsWith('OU=')) {
+				orgName = part.split('=')[1];
+				break;
+			}
+		}
+ 
+
+		const ownerId =  orgName
+
+		queryString.selector.vaccine.owner = ownerId;
+
+		return await this.GetQueryResultForQueryString(ctx, JSON.stringify(queryString)); //shim.success(queryResults);
+	}
+
+	async QueryAllVaccinesContainer(ctx, id) {
+		let queryString = {};
+		queryString.selector = {};
+		queryString.selector.docType = 'vaccine';
+		queryString.selector.containerId = id;
 		return await this.GetQueryResultForQueryString(ctx, JSON.stringify(queryString)); //shim.success(queryResults);
 	}
 
@@ -247,7 +277,6 @@ class Chaincode extends Contract{
 			assetToTransfer['transactionType'] = "VIOLATION_OPENING"  
 		}
 		else{
-			assetToTransfer['readings'][parameterName] = parameterValue;
 			assetToTransfer['transactionType'] = "VIOLATION_TEMPERATURE"  
 		}      
 		await ctx.stub.putState(vaccineId, Buffer.from(JSON.stringify(assetToTransfer)));
@@ -338,7 +367,6 @@ class Chaincode extends Contract{
 				asset.vaccineId,
 				asset.containerId,
 				JSON.stringify(asset.threshold),
-				JSON.stringify(asset.readings),
 				asset.brand,
 				asset.owner
 			);

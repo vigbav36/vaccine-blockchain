@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-const {getVaccinesByBrand , registerViolations, getVaccineHistory, addVaccine, getVaccine, transferOwner, registerUser, requestTransfer}= require("../application/vaccine.js")
+const {getVaccinesByBrand , registerViolations, getVaccineHistory, addVaccine, getVaccine, transferOwner, registerUser, requestTransfer, getAllVaccines, getAllVaccinesContainer}= require("../application/vaccine.js")
 var requireAuth = require('../application/middleWare');
 const session = require('express-session');
 const bcrypt = require('bcrypt');
@@ -38,11 +38,30 @@ router.get('/history/:vaccine_id', requireAuth, async function(req, res) {
     const result = await getVaccineHistory(req.params.vaccine_id)
     res.json(result);
 });
+router.get('/request/all',requireAuth, async function(req, res) {
+    console.log("Inside");
+    const vaccines = await getAllVaccines();
+    const results = [];
+    for(let i = 0; i < vaccines.length; i++){
+        results.push(await getVaccine(vaccines[i]['Key']));
+        
+    }
+    
+    // console.log(result[0]['Value']);
+    const incomingRequests = []
+    results.forEach(result => {
+        console.log(result);
 
+        if(result['transactionType'] == "TRANSFER_REQUESTED"){
+            incomingRequests.push(result);
+        }
+    })
+    res.json(incomingRequests);
+});
 router.post('/', requireAuth,  async function(req, res){
     const{vaccine} = req.body
     console.log(vaccine)
-    await addVaccine(vaccine)
+    await addVaccine(vaccine, req.session.username);
     res.status(200).json(await getVaccineHistory(vaccine.vaccineId))
 });
 
@@ -57,6 +76,36 @@ router.post('/violation', async function(req, res){
         const result = registerViolations(vaccine_id, violations);
         
         res.status(200).json(result);
+
+    } catch (error) {
+        console.error('Error processing request:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+
+router.post('/violations', async function(req, res){
+    try {
+        const { container_id, violations } = req.body;
+
+        if (!container_id || !violations) {
+        return res.status(400).json({ error: 'Invalid request body format' });
+        }
+        
+        const vaccines = await getAllVaccinesContainer(container_id);
+        const results = [];
+        for(let i = 0; i < vaccines.length; i++){
+            results.push(await getVaccine(vaccines[i]['Key']));
+            
+        }
+        
+        const incomingRequests = []
+        results.forEach(result => {
+            console.log(result);
+            registerViolations(result["vaccineId"], violations, result);
+        })
+        
+        res.status(200).json({});
 
     } catch (error) {
         console.error('Error processing request:', error);
@@ -98,7 +147,7 @@ router.post('/register', requireAuth, async function(req, res){
         const {user_id, user_password} = req.body;
         await registerUserDB(user_id, user_password);
 
-        //await registerUser(user_id);
+        await registerUser(user_id);
         res.status(200).json({message : 'Succesfully registered user'});
     }
     catch(error){
