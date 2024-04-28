@@ -1,0 +1,30 @@
+<div class="table-responsive card">
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th scope="col">Vaccine ID</th>
+      <th scope="col">Container ID</th>
+      <th scope="col">Brand</th>
+      <th scope="col">Owner</th>
+      <th scope="col">Threshold</th>
+      <th scope="col">Transaction Type</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor = "let result of results">
+      <td>{{result.vaccineId}}</td>
+      <td>{{result.containerId}}</td>
+      <td>{{result.brand}}</td>
+      <td>{{result.owner}}</td>
+      <td>
+        <ul>
+          <li>Temperature - {{result.threshold.temp}}° C</li>
+          <li>Humdity - {{result.threshold.humidity}}%</li>
+        </ul>
+      </td>
+      <td>{{result.transaction}}</td>
+
+    </tr>
+  </tbody>
+</table>
+</div>

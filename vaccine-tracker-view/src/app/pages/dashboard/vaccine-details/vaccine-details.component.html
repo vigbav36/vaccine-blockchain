@@ -1,0 +1,49 @@
+<div class="container">
+  <div class="search-bar">
+    <div class="search-bar-container">
+      <form action="" class = "form" (ngSubmit)="viewHistory()">
+        <div class="form-group">
+          <input class = "form-control" name = "vaccineId"  type="text" placeholder="Vaccine ID" [(ngModel)] = "vaccineId">
+        </div>
+        <div class="button">
+          <button type = "submit" class = "btn btn-primary submit-btn"> <i class = "fa-solid fa-search"></i><span>Search</span></button>
+        </div>
+      </form>
+
+    </div>
+
+  </div>
+  <div class="search-results">
+    <div class="table-responsive card">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th scope="col">Vaccine ID</th>
+            <th scope="col">Container ID</th>
+            <th scope="col">Brand</th>
+            <th scope="col">Owner</th>
+            <th scope="col">Threshold</th>
+            <th scope="col">Transaction Type</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor = "let history of vaccineHistory">
+            <td>{{history.Value.vaccineId}}</td>
+            <td>{{history.Value.containerId}}</td>
+            <td>{{history.Value.brand}}</td>
+            <td>{{history.Value.owner}}</td>
+            <td>
+              <ul>
+                <li>Temperature - {{history.Value.threshold.temperature}}° C</li>
+                <li>Humdity - {{history.Value.threshold.humidity}}%</li>
+              </ul>
+            </td>
+            <td>{{history.Value.transactionType}}</td>
+
+          </tr>
+        </tbody>
+      </table>
+      </div>
+
+  </div>
+</div>

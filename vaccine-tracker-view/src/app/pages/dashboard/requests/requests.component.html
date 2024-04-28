@@ -1,0 +1,40 @@
+<div class="notification-container" *ngIf = "showPopup">
+  <span><i class = "fa-solid fa-circle-exclamation"></i>Request has been sent!</span>
+</div>
+<div class="container">
+<div class="request-transfer-container requests">
+  <h4>Request Transfer</h4>
+  <form class = "request-form" (ngSubmit)="submitRequest()" action="">
+    <div class="form-group">
+      <label for="">Vaccine ID</label>
+      <input type="text" name = "vaccineId" [(ngModel)]="vaccineIdReq" class="form-control" placeholder="Enter the vaccine ID">
+    </div>
+    <div class="button-container">
+      <button class="btn btn-primary">Request Transfer</button>
+    </div>
+  </form>
+</div>
+<div class="incoming-requests-container requests">
+  <h4>Incoming Requests</h4>
+  <div class="incoming-request" *ngFor = "let request of incomingRequests;let  i = index">
+    <ng-container  *ngIf = "request.owner == owner">
+    <div class="request-details">
+      <div class="id">
+        <span>{{request.vaccineId}}</span>
+      </div>
+      <div class="owner">
+        <span>{{request.owner}}</span>
+      </div>
+      <div class="owner">
+        <span>{{request.brand}}</span>
+      </div>
+    </div>
+    <div class="request-choice">
+      <div class="accept">
+        <button class = "btn btn-primary accept-btn choice-btn" (click) = "acceptRequest(request.vaccineId)"><i class = "fa-solid fa-check"></i></button>
+      </div>
+    </div>
+  </ng-container>
+  </div>
+</div>
+</div>

@@ -1,0 +1,25 @@
+<div class="sidebar">
+  <div class="sidebar-heading">
+    <span>VAX</span>
+  </div>
+  <div class="sidebar-navigation">
+    <ul class="nav-list">
+      <div class=" li-container" (click)="select(0)" [ngClass]="{'selected': this.selected == 0}">
+        <li class = ""> <i class="fa-solid fa-syringe"></i> <span>Vaccine History</span> </li>
+      </div>
+      <div class="li-container" (click)="select(1)" [ngClass]="{'selected': this.selected == 1}">
+      <li><i class="fa-regular fa-plus"></i> <span>Add Vaccine</span> </li>
+
+      </div>
+      <div class="li-container" (click)="select(2)" [ngClass]="{'selected': this.selected == 2}">
+      <li><i class="fa-regular fa-pen-to-square"> </i><span>Requests</span></li>
+
+      </div>
+    </ul>
+  </div>
+  <div class="sidebar-user">
+
+  </div>
+
+
+</div>
